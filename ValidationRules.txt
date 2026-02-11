@@ -1,0 +1,111 @@
+# Stored Procedure Validation Rules Configuration
+# This file defines the business rules used to validate exported stored procedures
+
+## How to Add New Validation Rules
+
+To add a new validation rule:
+
+1. Add the rule definition to the "Active Rules" section below
+2. Update the ProcessAndValidate.ps1 script to implement the validation logic
+3. Follow this pattern for each rule:
+   - Rule number and description
+   - Regex pattern (if applicable)
+   - Violation message format
+
+## Active Rules
+
+### Rule #2: RecordStatus Validation
+**Description:** All stored procedures must include a check for RecordStatus=0 when querying tables
+**Purpose:** Ensures that only active records are included in query results
+**Validation Method:** Regex pattern match
+**Pattern:** RecordStatus\s*=\s*0
+**Violation Message:** "Rule #2: Missing RecordStatus=0 check"
+**Severity:** Warning
+
+### Rule #3: Naming Convention
+**Description:** Procedure names must follow the pattern [SCHEMA.]<ProcType>_
+**Purpose:** Ensures consistent naming standards across all stored procedures
+**Validation Method:** Regex pattern match
+**Pattern:** Must contain underscore after procedure type identifier
+**Additional Check:** If schema is specified in CREATE statement, it must match the filename schema
+**Violation Messages:**
+  - "Rule #3: Proc name 'X' doesn't follow naming convention <ProcType>_ (must have underscore)"
+  - "Rule #3: Schema mismatch - CREATE statement uses 'X' but filename schema is 'Y'"
+**Severity:** Error
+
+**Valid Examples:**
+  - RptSrc_OpenPendingActions (ProcType = RptSrc)
+  - List_DefaultContactRegType (ProcType = List)
+  - RptSrc_REG_AL_ASC_PendingActionHistoryByFile# (ProcType = RptSrc, includes special char)
+
+**Invalid Examples:**
+  - GetData (no underscore)
+  - Report-Generate (hyphen instead of underscore)
+
+## Adding New Rules - Step by Step
+
+### Step 1: Define Your Rule
+Choose a rule number (e.g., Rule #4) and clearly describe:
+- What the rule checks
+- Why it's important
+- How violations should be reported
+
+### Step 2: Determine Validation Method
+Decide how the rule will be validated:
+- Regex pattern matching (for text/format checks)
+- Code analysis (for logic checks)
+- External validation (for database checks)
+
+### Step 3: Add to This Configuration File
+Document the new rule in the "Active Rules" section above following the same format
+
+### Step 4: Implement in ProcessAndValidate.ps1
+Add validation logic in the SECTION 2: VALIDATE EXPORTED PROCEDURES section:
+
+```powershell
+# Rule #4: Your new rule description
+$checkCondition = $content -match 'YourRegexPattern'
+if (-not $checkCondition) {
+    $violations += "Rule #4: Your violation message"
+}
+```
+
+### Step 5: Test Your Rule
+1. Run validation on known good procedures (should pass)
+2. Run validation on procedures that violate the rule (should fail)
+3. Verify violation messages are clear and actionable
+
+## Example: Adding a New Rule #4
+
+Let's say you want to add a rule that all procedures must have a TRY/CATCH block:
+
+**Rule Definition:**
+### Rule #4: Error Handling Required
+**Description:** All stored procedures must include TRY/CATCH error handling
+**Purpose:** Ensures consistent error handling and logging
+**Validation Method:** Regex pattern match
+**Pattern:** BEGIN\s+TRY.*END\s+CATCH
+**Violation Message:** "Rule #4: Missing TRY/CATCH error handling block"
+**Severity:** Warning
+
+**Implementation in ProcessAndValidate.ps1:**
+```powershell
+# Rule #4: Error handling - TRY/CATCH block required
+$hasTryCatch = $content -match '(?s)BEGIN\s+TRY.*?END\s+CATCH'
+if (-not $hasTryCatch) {
+    $violations += "Rule #4: Missing TRY/CATCH error handling block"
+}
+```
+
+## Rule Severity Levels
+
+- **Error:** Must be fixed before deployment
+- **Warning:** Should be reviewed, may be acceptable in some cases
+- **Info:** Best practice recommendation, not required
+
+## Notes
+
+- Rules are executed in order
+- Multiple violations can be reported for a single procedure
+- All violations are written to Validation_Results.txt
+- Rules can be temporarily disabled by commenting them out in the script
