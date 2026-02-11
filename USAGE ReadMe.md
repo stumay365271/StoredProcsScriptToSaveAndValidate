@@ -19,7 +19,7 @@ If you have only the PROMPT_DOCUMENTATION.md file:
 
 ## What This Solution Does
 
-- **Exports** stored procedures from SQL Server to individual .sql files with consistent formatting
+- **Exports** stored procedures from SQL Server to individual .sql files in a folder you specify
 - **Validates** procedures against business rules (naming conventions, RecordStatus checks)
 - **Reports** compliance violations in a detailed validation report
 - **Dual-mode operation**: Export+Validate or Validate-Only
@@ -30,8 +30,8 @@ If you have only the PROMPT_DOCUMENTATION.md file:
 - **ProcessAndValidate.ps1** - The main PowerShell script
 - **ValidationRules.txt** - Business rules configuration with instructions for adding new rules
 - **PROMPT_DOCUMENTATION.md** - Complete prompt history showing how this was built
-- **CONTEST_ENTRY_COVER_SHEET.md** - Contest submission cover sheet
-- **README.md** - This file
+- **README.md** - The Project Cover Sheet
+- **USAGE ReadMe.md** This file
 
 ## Usage
 
@@ -73,3 +73,4 @@ This project demonstrates the power of AI-assisted development through iterative
 4. Building a production-ready tool in a single session
 
 The PROMPT_DOCUMENTATION.md file captures this entire process, making it fully reproducible.
+
